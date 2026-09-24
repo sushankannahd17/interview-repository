@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # User documentation & plans
 mydocs/
 
@@ -31,37 +30,3 @@ frontend/.vite/
 *.swp
 *.DS_Store
 Thumbs.db
-=======
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-*.egg-info/
-dist/
-build/
-.eggs/
-
-.env
-*.env.local
-
-.pytest_cache/
-.coverage
-htmlcov/
-.mypy_cache/
-.ruff_cache/
-
-*.db
-*.sqlite3
-
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-docker-compose.override.yml
->>>>>>> 6b48f00 (feat: implement Team A backend module)
