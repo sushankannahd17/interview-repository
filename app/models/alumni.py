@@ -17,9 +17,7 @@ if TYPE_CHECKING:
 class PlacedAlumni(TimestampMixin, Base):
     __tablename__ = "placed_alumni"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     graduation_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     company_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -28,6 +26,4 @@ class PlacedAlumni(TimestampMixin, Base):
     role_at_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     company: Mapped[Company | None] = relationship()
-    interview_experiences: Mapped[list[InterviewExperience]] = relationship(
-        back_populates="alumni"
-    )
+    interview_experiences: Mapped[list[InterviewExperience]] = relationship(back_populates="alumni")

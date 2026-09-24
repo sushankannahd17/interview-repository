@@ -20,9 +20,7 @@ class BaseRepository(Generic[ModelType]):
         await self.session.flush()
         return entity
 
-    async def paginate(
-        self, stmt: Select, page: int, size: int
-    ) -> tuple[list[ModelType], int]:
+    async def paginate(self, stmt: Select, page: int, size: int) -> tuple[list[ModelType], int]:
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 

@@ -66,9 +66,7 @@ async def test_filter_questions_by_category(
 ):
     await _seed_questions(db_session)
 
-    response = await client.get(
-        f"{QUESTIONS_URL}?category=DSA", headers=student_auth_headers
-    )
+    response = await client.get(f"{QUESTIONS_URL}?category=DSA", headers=student_auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -82,9 +80,7 @@ async def test_filter_questions_by_difficulty(
 ):
     await _seed_questions(db_session)
 
-    response = await client.get(
-        f"{QUESTIONS_URL}?difficulty=HARD", headers=student_auth_headers
-    )
+    response = await client.get(f"{QUESTIONS_URL}?difficulty=HARD", headers=student_auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -98,8 +94,6 @@ async def test_get_question_by_id(
 ):
     questions = await _seed_questions(db_session)
 
-    response = await client.get(
-        f"{QUESTIONS_URL}/{questions[0].id}", headers=student_auth_headers
-    )
+    response = await client.get(f"{QUESTIONS_URL}/{questions[0].id}", headers=student_auth_headers)
     assert response.status_code == 200
     assert response.json()["question_text"] == "Explain B-trees"

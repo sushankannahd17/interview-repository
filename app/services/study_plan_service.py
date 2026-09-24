@@ -31,9 +31,7 @@ class StudyPlanService:
         if payload.target_company_id:
             company = await self.session.get(Company, payload.target_company_id)
             if not company:
-                raise EntityNotFoundError(
-                    "Company", str(payload.target_company_id)
-                )
+                raise EntityNotFoundError("Company", str(payload.target_company_id))
 
         plan = StudyPlan(
             student_id=student_id,
@@ -85,9 +83,7 @@ class StudyPlanService:
             sort_order=pagination.sort_order,
         )
 
-        response_items = [
-            StudyPlanResponse.model_validate(item).model_dump() for item in items
-        ]
+        response_items = [StudyPlanResponse.model_validate(item).model_dump() for item in items]
 
         return build_paginated_response(
             items=response_items,
@@ -113,9 +109,7 @@ class StudyPlanService:
         if payload.target_company_id:
             company = await self.session.get(Company, payload.target_company_id)
             if not company:
-                raise EntityNotFoundError(
-                    "Company", str(payload.target_company_id)
-                )
+                raise EntityNotFoundError("Company", str(payload.target_company_id))
 
         update_data = payload.model_dump(exclude_unset=True)
         for field, value in update_data.items():

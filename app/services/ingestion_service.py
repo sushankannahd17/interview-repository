@@ -24,9 +24,7 @@ class IngestionService:
     async def ingest_interview(
         self, payload: TeamBInterviewPayload
     ) -> tuple[InterviewResponse, bool]:
-        existing = await self.interview_repo.find_by_source(
-            SOURCE_SYSTEM, payload.source_id
-        )
+        existing = await self.interview_repo.find_by_source(SOURCE_SYSTEM, payload.source_id)
         if existing:
             logger.info(
                 "duplicate_ingestion_skipped",

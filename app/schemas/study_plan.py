@@ -17,11 +17,7 @@ class StudyPlanCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_dates(self) -> Self:
-        if (
-            self.start_date
-            and self.target_date
-            and self.target_date <= self.start_date
-        ):
+        if self.start_date and self.target_date and self.target_date <= self.start_date:
             raise ValueError("target_date must be after start_date")
         return self
 

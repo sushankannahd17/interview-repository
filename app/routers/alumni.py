@@ -29,9 +29,7 @@ async def list_alumni(
         sort_by=pagination.sort_by,
         sort_order=pagination.sort_order,
     )
-    response_items = [
-        AlumniResponse.model_validate(item).model_dump() for item in items
-    ]
+    response_items = [AlumniResponse.model_validate(item).model_dump() for item in items]
     return build_paginated_response(
         items=response_items,
         total=total,

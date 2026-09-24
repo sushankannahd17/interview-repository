@@ -27,6 +27,4 @@ class ForbiddenError(AppException):
 
 class BusinessValidationError(AppException):
     def __init__(self, detail: str):
-        super().__init__(
-            detail=detail, error_code="BUSINESS_VALIDATION_ERROR", status_code=422
-        )
+        super().__init__(detail=detail, error_code="BUSINESS_VALIDATION_ERROR", status_code=422)

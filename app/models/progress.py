@@ -17,9 +17,7 @@ if TYPE_CHECKING:
 class ProgressEntry(TimestampMixin, Base):
     __tablename__ = "progress_entries"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     study_plan_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("study_plans.id"),
@@ -27,12 +25,8 @@ class ProgressEntry(TimestampMixin, Base):
         index=True,
     )
     topic: Mapped[str] = mapped_column(String(255), nullable=False)
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="NOT_STARTED"
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="NOT_STARTED")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     study_plan: Mapped[StudyPlan] = relationship(back_populates="progress_entries")

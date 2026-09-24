@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, Index, String, Text, UniqueConstraint
@@ -20,15 +20,11 @@ if TYPE_CHECKING:
 class InterviewExperience(TimestampMixin, Base):
     __tablename__ = "interview_experiences"
     __table_args__ = (
-        UniqueConstraint(
-            "source_system", "source_record_id", name="uq_interview_source"
-        ),
+        UniqueConstraint("source_system", "source_record_id", name="uq_interview_source"),
         Index("ix_interview_company_difficulty", "company_id", "difficulty"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("students.id"), nullable=False, index=True
     )
@@ -49,9 +45,7 @@ class InterviewExperience(TimestampMixin, Base):
 
     student: Mapped[Student] = relationship(back_populates="interview_experiences")
     company: Mapped[Company] = relationship(back_populates="interview_experiences")
-    alumni: Mapped[PlacedAlumni | None] = relationship(
-        back_populates="interview_experiences"
-    )
+    alumni: Mapped[PlacedAlumni | None] = relationship(back_populates="interview_experiences")
     questions: Mapped[list[Question]] = relationship(
         back_populates="interview_experience", cascade="all, delete-orphan"
     )
