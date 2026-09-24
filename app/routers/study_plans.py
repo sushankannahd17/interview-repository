@@ -37,9 +37,7 @@ async def get_study_plan(
     current_user: TokenPayload = Depends(require_any),
     service: StudyPlanService = Depends(get_study_plan_service),
 ) -> StudyPlanResponse:
-    return await service.get_study_plan(
-        plan_id, current_user.user_id, current_user.role == "admin"
-    )
+    return await service.get_study_plan(plan_id, current_user.user_id, current_user.role == "admin")
 
 
 @router.patch("/{plan_id}", response_model=StudyPlanResponse)

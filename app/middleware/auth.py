@@ -24,11 +24,11 @@ async def get_current_user(
             role=payload["role"],
             email=payload.get("email", ""),
         )
-    except (JWTError, KeyError, ValueError):
+    except (JWTError, KeyError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-        )
+        ) from exc
 
 
 def require_role(*roles: str):

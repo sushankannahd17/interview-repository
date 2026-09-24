@@ -22,9 +22,7 @@ class InterviewRepository(BaseRepository[InterviewExperience]):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_with_questions(
-        self, id: uuid.UUID
-    ) -> InterviewExperience | None:
+    async def get_with_questions(self, id: uuid.UUID) -> InterviewExperience | None:
         stmt = (
             select(InterviewExperience)
             .options(selectinload(InterviewExperience.questions))
@@ -44,25 +42,17 @@ class InterviewRepository(BaseRepository[InterviewExperience]):
         stmt = select(InterviewExperience)
 
         if "company_id" in filters:
-            stmt = stmt.where(
-                InterviewExperience.company_id == filters["company_id"]
-            )
+            stmt = stmt.where(InterviewExperience.company_id == filters["company_id"])
         if "role" in filters:
             stmt = stmt.where(InterviewExperience.role.ilike(f"%{filters['role']}%"))
         if "difficulty" in filters:
-            stmt = stmt.where(
-                InterviewExperience.difficulty == filters["difficulty"]
-            )
+            stmt = stmt.where(InterviewExperience.difficulty == filters["difficulty"])
         if "status" in filters:
             stmt = stmt.where(InterviewExperience.status == filters["status"])
         if "date_from" in filters:
-            stmt = stmt.where(
-                InterviewExperience.interview_date >= filters["date_from"]
-            )
+            stmt = stmt.where(InterviewExperience.interview_date >= filters["date_from"])
         if "date_to" in filters:
-            stmt = stmt.where(
-                InterviewExperience.interview_date <= filters["date_to"]
-            )
+            stmt = stmt.where(InterviewExperience.interview_date <= filters["date_to"])
 
         sort_column = getattr(InterviewExperience, sort_by, InterviewExperience.created_at)
         if sort_order == "asc":
@@ -72,9 +62,7 @@ class InterviewRepository(BaseRepository[InterviewExperience]):
 
         return await self.paginate(stmt, page, size)
 
-    async def create_with_questions(
-        self, interview: InterviewExperience
-    ) -> InterviewExperience:
+    async def create_with_questions(self, interview: InterviewExperience) -> InterviewExperience:
         self.session.add(interview)
         await self.session.flush()
         return interview

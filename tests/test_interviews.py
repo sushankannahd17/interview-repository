@@ -47,9 +47,7 @@ async def test_get_interview(
 ):
     interview = await _seed_interview(db_session)
 
-    response = await client.get(
-        f"{INTERVIEWS_URL}/{interview.id}", headers=student_auth_headers
-    )
+    response = await client.get(f"{INTERVIEWS_URL}/{interview.id}", headers=student_auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -59,12 +57,8 @@ async def test_get_interview(
 
 
 @pytest.mark.asyncio
-async def test_get_interview_not_found(
-    client: AsyncClient, student_auth_headers
-):
-    response = await client.get(
-        f"{INTERVIEWS_URL}/{uuid.uuid4()}", headers=student_auth_headers
-    )
+async def test_get_interview_not_found(client: AsyncClient, student_auth_headers):
+    response = await client.get(f"{INTERVIEWS_URL}/{uuid.uuid4()}", headers=student_auth_headers)
     assert response.status_code == 404
 
 
@@ -75,9 +69,7 @@ async def test_list_interviews_pagination(
     for i in range(15):
         await _seed_interview(db_session, source_id=f"page-{i}")
 
-    response = await client.get(
-        f"{INTERVIEWS_URL}?page=1&size=10", headers=student_auth_headers
-    )
+    response = await client.get(f"{INTERVIEWS_URL}?page=1&size=10", headers=student_auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -95,9 +87,7 @@ async def test_list_interviews_filter_difficulty(
     await _seed_interview(db_session, source_id="easy-1", difficulty="EASY")
     await _seed_interview(db_session, source_id="hard-1", difficulty="HARD")
 
-    response = await client.get(
-        f"{INTERVIEWS_URL}?difficulty=EASY", headers=student_auth_headers
-    )
+    response = await client.get(f"{INTERVIEWS_URL}?difficulty=EASY", headers=student_auth_headers)
     assert response.status_code == 200
 
     data = response.json()

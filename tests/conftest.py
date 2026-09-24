@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timezone
 from collections.abc import AsyncGenerator
+from datetime import datetime, timezone
 
 import pytest
 import pytest_asyncio
@@ -11,16 +11,16 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.config import settings
 from app.database import get_db
 from app.main import app
-from app.models.base import Base
 from app.models import (  # noqa: F401
-    Student,
     Company,
-    PlacedAlumni,
     InterviewExperience,
-    Question,
-    StudyPlan,
+    PlacedAlumni,
     ProgressEntry,
+    Question,
+    Student,
+    StudyPlan,
 )
+from app.models.base import Base
 
 TEST_DATABASE_URL = settings.DATABASE_URL
 

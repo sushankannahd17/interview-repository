@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +26,7 @@ class QuestionRepository(BaseRepository[Question]):
             )
         if "interview_experience_id" in filters:
             stmt = stmt.where(
-                Question.interview_experience_id
-                == filters["interview_experience_id"]
+                Question.interview_experience_id == filters["interview_experience_id"]
             )
         if "category" in filters:
             stmt = stmt.where(Question.category == filters["category"])

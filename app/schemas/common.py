@@ -24,9 +24,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
     has_previous: bool
 
 
-def build_paginated_response(
-    items: list, total: int, page: int, size: int
-) -> dict:
+def build_paginated_response(items: list, total: int, page: int, size: int) -> dict:
     total_pages = math.ceil(total / size) if size > 0 else 0
     return {
         "items": items,

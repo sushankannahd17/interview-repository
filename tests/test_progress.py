@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.progress import ProgressEntry
 from app.models.study_plan import StudyPlan
-from tests.conftest import STUDENT_UUID, STUDENT_2_UUID
+from tests.conftest import STUDENT_UUID
 
 
 async def _seed_plan(db_session: AsyncSession, student_id=STUDENT_UUID) -> StudyPlan:
@@ -142,9 +142,7 @@ async def test_list_progress(
 
 
 @pytest.mark.asyncio
-async def test_progress_nonexistent_plan(
-    client: AsyncClient, seed_all, student_auth_headers
-):
+async def test_progress_nonexistent_plan(client: AsyncClient, seed_all, student_auth_headers):
     response = await client.post(
         f"/api/v1/study-plans/{uuid.uuid4()}/progress",
         json={"topic": "Test", "status": "NOT_STARTED"},

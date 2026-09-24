@@ -19,9 +19,7 @@ class ProgressRepository(BaseRepository[ProgressEntry]):
         sort_by: str = "created_at",
         sort_order: str = "desc",
     ) -> tuple[list[ProgressEntry], int]:
-        stmt = select(ProgressEntry).where(
-            ProgressEntry.study_plan_id == study_plan_id
-        )
+        stmt = select(ProgressEntry).where(ProgressEntry.study_plan_id == study_plan_id)
 
         sort_column = getattr(ProgressEntry, sort_by, ProgressEntry.created_at)
         if sort_order == "asc":

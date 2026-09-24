@@ -36,9 +36,7 @@ class QuestionService:
             sort_order=pagination.sort_order,
         )
 
-        response_items = [
-            QuestionResponse.model_validate(item).model_dump() for item in items
-        ]
+        response_items = [QuestionResponse.model_validate(item).model_dump() for item in items]
 
         return build_paginated_response(
             items=response_items,

@@ -36,9 +36,7 @@ class ProgressService:
         requesting_user_id: uuid.UUID,
         is_admin: bool,
     ) -> ProgressResponse:
-        await self._get_plan_with_ownership_check(
-            plan_id, requesting_user_id, is_admin
-        )
+        await self._get_plan_with_ownership_check(plan_id, requesting_user_id, is_admin)
 
         status_value = payload.status.value if hasattr(payload.status, "value") else payload.status
 
@@ -47,9 +45,7 @@ class ProgressService:
             topic=payload.topic,
             status=status_value,
             notes=payload.notes,
-            completed_at=datetime.now(timezone.utc)
-            if status_value == "COMPLETED"
-            else None,
+            completed_at=datetime.now(timezone.utc) if status_value == "COMPLETED" else None,
         )
 
         created = await self.repo.create(entry)
@@ -67,9 +63,7 @@ class ProgressService:
         if not entry:
             raise EntityNotFoundError("ProgressEntry", str(progress_id))
 
-        await self._get_plan_with_ownership_check(
-            entry.study_plan_id, requesting_user_id, is_admin
-        )
+        await self._get_plan_with_ownership_check(entry.study_plan_id, requesting_user_id, is_admin)
 
         update_data = payload.model_dump(exclude_unset=True)
         for field, value in update_data.items():
@@ -97,9 +91,7 @@ class ProgressService:
         requesting_user_id: uuid.UUID,
         is_admin: bool,
     ) -> dict:
-        await self._get_plan_with_ownership_check(
-            plan_id, requesting_user_id, is_admin
-        )
+        await self._get_plan_with_ownership_check(plan_id, requesting_user_id, is_admin)
 
         items, total = await self.repo.find_by_study_plan(
             study_plan_id=plan_id,
@@ -109,9 +101,7 @@ class ProgressService:
             sort_order=pagination.sort_order,
         )
 
-        response_items = [
-            ProgressResponse.model_validate(item).model_dump() for item in items
-        ]
+        response_items = [ProgressResponse.model_validate(item).model_dump() for item in items]
 
         return build_paginated_response(
             items=response_items,

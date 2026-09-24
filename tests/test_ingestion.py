@@ -39,9 +39,7 @@ def _valid_payload(source_id: str = "tb-int-001") -> dict:
 
 
 @pytest.mark.asyncio
-async def test_ingest_interview_success(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_interview_success(client: AsyncClient, seed_all, team_b_headers):
     response = await client.post(INGEST_URL, json=_valid_payload(), headers=team_b_headers)
     assert response.status_code == 201
 
@@ -54,9 +52,7 @@ async def test_ingest_interview_success(
 
 
 @pytest.mark.asyncio
-async def test_ingest_idempotency(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_idempotency(client: AsyncClient, seed_all, team_b_headers):
     payload = _valid_payload("tb-int-idem-001")
 
     r1 = await client.post(INGEST_URL, json=payload, headers=team_b_headers)
@@ -69,9 +65,7 @@ async def test_ingest_idempotency(
 
 
 @pytest.mark.asyncio
-async def test_ingest_missing_student(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_missing_student(client: AsyncClient, seed_all, team_b_headers):
     payload = _valid_payload("tb-int-miss-stu")
     payload["student_id"] = str(uuid.uuid4())
 
@@ -81,9 +75,7 @@ async def test_ingest_missing_student(
 
 
 @pytest.mark.asyncio
-async def test_ingest_missing_company(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_missing_company(client: AsyncClient, seed_all, team_b_headers):
     payload = _valid_payload("tb-int-miss-co")
     payload["company_id"] = str(uuid.uuid4())
 
@@ -93,9 +85,7 @@ async def test_ingest_missing_company(
 
 
 @pytest.mark.asyncio
-async def test_ingest_invalid_difficulty(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_invalid_difficulty(client: AsyncClient, seed_all, team_b_headers):
     payload = _valid_payload("tb-int-bad-diff")
     payload["difficulty"] = "IMPOSSIBLE"
 
@@ -104,9 +94,7 @@ async def test_ingest_invalid_difficulty(
 
 
 @pytest.mark.asyncio
-async def test_ingest_empty_questions(
-    client: AsyncClient, seed_all, team_b_headers
-):
+async def test_ingest_empty_questions(client: AsyncClient, seed_all, team_b_headers):
     payload = _valid_payload("tb-int-no-q")
     payload["questions"] = []
 
