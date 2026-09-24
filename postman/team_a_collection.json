@@ -1,0 +1,274 @@
+{
+  "info": {
+    "name": "Team A — Interview & Study Management Platform",
+    "description": "API collection for Team A backend endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    },
+    {
+      "key": "integration_key",
+      "value": "change-me-in-production"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/health",
+            "auth": { "type": "noauth" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team B Ingestion",
+      "item": [
+        {
+          "name": "Ingest Interview",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/integrations/team-b/interviews",
+            "auth": { "type": "noauth" },
+            "header": [
+              {
+                "key": "X-Integration-Key",
+                "value": "{{integration_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_id\": \"tb-int-001\",\n  \"student_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"company_id\": \"44444444-4444-4444-4444-444444444444\",\n  \"alumni_id\": null,\n  \"role\": \"Software Engineer\",\n  \"interview_date\": \"2026-09-20\",\n  \"difficulty\": \"HARD\",\n  \"experience_text\": \"Great interview experience.\",\n  \"tips\": \"Practice system design.\",\n  \"questions\": [\n    {\n      \"source_id\": \"tb-q-001\",\n      \"question_text\": \"Explain TCP vs UDP\",\n      \"category\": \"NETWORKING\",\n      \"difficulty\": \"MEDIUM\",\n      \"expected_answer\": null\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Ingest Interview — Duplicate",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/integrations/team-b/interviews",
+            "auth": { "type": "noauth" },
+            "header": [
+              {
+                "key": "X-Integration-Key",
+                "value": "{{integration_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_id\": \"tb-int-001\",\n  \"student_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"company_id\": \"44444444-4444-4444-4444-444444444444\",\n  \"role\": \"Software Engineer\",\n  \"interview_date\": \"2026-09-20\",\n  \"difficulty\": \"HARD\",\n  \"experience_text\": \"Great interview experience.\",\n  \"questions\": [\n    {\n      \"source_id\": \"tb-q-001\",\n      \"question_text\": \"Explain TCP vs UDP\",\n      \"category\": \"NETWORKING\",\n      \"difficulty\": \"MEDIUM\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Ingest Interview — Invalid Key",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/integrations/team-b/interviews",
+            "auth": { "type": "noauth" },
+            "header": [
+              {
+                "key": "X-Integration-Key",
+                "value": "wrong-key"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interviews",
+      "item": [
+        {
+          "name": "List Interviews",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/interviews?page=1&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["interviews"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" },
+                { "key": "difficulty", "value": "", "disabled": true },
+                { "key": "company_id", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Interview by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/interviews/{{interview_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "List Questions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/questions?page=1&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["questions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" },
+                { "key": "category", "value": "", "disabled": true },
+                { "key": "difficulty", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Question by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/questions/{{question_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Study Plans",
+      "item": [
+        {
+          "name": "Create Study Plan",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/study-plans",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"DSA Prep Plan\",\n  \"description\": \"Prepare for coding interviews.\",\n  \"target_company_id\": \"44444444-4444-4444-4444-444444444444\",\n  \"target_role\": \"Software Engineer\",\n  \"start_date\": \"2026-10-01\",\n  \"target_date\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Study Plans",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/study-plans"
+          }
+        },
+        {
+          "name": "Get Study Plan by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/study-plans/{{study_plan_id}}"
+          }
+        },
+        {
+          "name": "Update Study Plan",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/study-plans/{{study_plan_id}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Plan Title\",\n  \"status\": \"COMPLETED\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Create Progress Entry",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/study-plans/{{study_plan_id}}/progress",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"Binary Search\",\n  \"status\": \"NOT_STARTED\",\n  \"notes\": \"Need to study divide and conquer approach.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Progress for Plan",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/study-plans/{{study_plan_id}}/progress"
+          }
+        },
+        {
+          "name": "Update Progress Entry",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/progress/{{progress_id}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\",\n  \"notes\": \"Finished all exercises.\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
