@@ -28,17 +28,23 @@ public class AuthService {
             return UserProfileResponse.fromEntity(userOptional.get());
         }
 
-        // If user record doesn't exist yet in app_users, build transient response from JWT
+        // If user record doesn't exist yet, save new student account
         Jwt jwt = currentUserService.getCurrentJwt()
                 .orElseThrow(() -> new AccessDeniedException("No authenticated principal found"));
 
-        return UserProfileResponse.builder()
+        String email = jwt.getClaimAsString("email");
+        String name = jwt.getClaimAsString("name");
+        if (name == null || name.isBlank()) {
+            name = email != null ? email.split("@")[0] : "Student";
+        }
+        User user = User.builder()
                 .authUserId(jwt.getSubject())
-                .email(jwt.getClaimAsString("email"))
-                .name(jwt.getClaimAsString("name"))
+                .email(email)
+                .name(name)
                 .role(Role.STUDENT)
-                .active(true)
+                .isActive(true)
                 .build();
+        return UserProfileResponse.fromEntity(userRepository.save(user));
     }
 
     @Transactional

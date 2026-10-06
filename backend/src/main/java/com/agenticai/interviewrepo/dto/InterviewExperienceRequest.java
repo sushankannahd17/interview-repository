@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class InterviewExperienceRequest {
-    @NotNull private UUID companyId;
+    private UUID companyId;
+    private String companyName;
     @NotBlank @Size(max = 100) private String role;
     private LocalDate interviewDate;
     @Size(max = 50) private String difficulty;
@@ -27,6 +28,8 @@ public class InterviewExperienceRequest {
 
     public UUID getCompanyId() { return companyId; }
     public void setCompanyId(UUID companyId) { this.companyId = companyId; }
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public LocalDate getInterviewDate() { return interviewDate; }

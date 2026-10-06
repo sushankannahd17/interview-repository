@@ -142,4 +142,22 @@ public class AdminController {
                 adminService.getModerationLogs(pageable)
         );
     }
+
+    // =========================
+    // MENTORSHIP ALLOCATION
+    // =========================
+
+    @GetMapping("/mentors")
+    public ResponseEntity<List<com.agenticai.interviewrepo.dto.AdminMentorOptionResponse>> getMentors()
+            throws AccessDeniedException {
+        return ResponseEntity.ok(adminService.getMentors());
+    }
+
+    @PatchMapping("/users/{id}/mentor")
+    public ResponseEntity<AdminUserResponse> assignMentor(
+            @PathVariable UUID id,
+            @RequestBody com.agenticai.interviewrepo.dto.AdminAssignMentorRequest request
+    ) throws AccessDeniedException {
+        return ResponseEntity.ok(adminService.assignMentor(id, request));
+    }
 }

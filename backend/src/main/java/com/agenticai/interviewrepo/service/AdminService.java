@@ -1,15 +1,23 @@
 package com.agenticai.interviewrepo.service;
 
+import com.agenticai.interviewrepo.dto.AdminAssignMentorRequest;
+import com.agenticai.interviewrepo.dto.AdminMentorOptionResponse;
 import com.agenticai.interviewrepo.dto.AdminModerationLogResponse;
 import com.agenticai.interviewrepo.dto.AdminProfileRequest;
 import com.agenticai.interviewrepo.dto.AdminProfileResponse;
 import com.agenticai.interviewrepo.dto.AdminRoleUpdateRequest;
 import com.agenticai.interviewrepo.dto.AdminUserResponse;
 import com.agenticai.interviewrepo.dto.AdminUserStatusRequest;
+import com.agenticai.interviewrepo.model.Administrator;
+import com.agenticai.interviewrepo.model.Mentor;
 import com.agenticai.interviewrepo.model.ModerationLog;
 import com.agenticai.interviewrepo.model.Role;
+import com.agenticai.interviewrepo.model.Student;
 import com.agenticai.interviewrepo.model.User;
+import com.agenticai.interviewrepo.repository.AdministratorRepository;
+import com.agenticai.interviewrepo.repository.MentorRepository;
 import com.agenticai.interviewrepo.repository.ModerationLogRepository;
+import com.agenticai.interviewrepo.repository.StudentRepository;
 import com.agenticai.interviewrepo.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,15 +33,24 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final ModerationLogRepository moderationLogRepository;
+    private final AdministratorRepository administratorRepository;
+    private final StudentRepository studentRepository;
+    private final MentorRepository mentorRepository;
     private final CurrentUserService currentUserService;
 
     public AdminService(
             UserRepository userRepository,
             ModerationLogRepository moderationLogRepository,
+            AdministratorRepository administratorRepository,
+            StudentRepository studentRepository,
+            MentorRepository mentorRepository,
             CurrentUserService currentUserService
     ) {
         this.userRepository = userRepository;
         this.moderationLogRepository = moderationLogRepository;
+        this.administratorRepository = administratorRepository;
+        this.studentRepository = studentRepository;
+        this.mentorRepository = mentorRepository;
         this.currentUserService = currentUserService;
     }
 
@@ -41,13 +58,20 @@ public class AdminService {
     // ADMIN PROFILE
     // =========================
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AdminProfileResponse getProfile()
             throws AccessDeniedException {
 
         User user = currentUserService.getCurrentUser();
 
         verifyAdmin(user);
+
+        administratorRepository.findByLogin(user).orElseGet(() -> {
+            Administrator admin = new Administrator();
+            admin.setLogin(user);
+            admin.setName(user.getName() != null && !user.getName().isBlank() ? user.getName() : user.getEmail());
+            return administratorRepository.save(admin);
+        });
 
         return toProfileResponse(user);
     }
@@ -251,6 +275,52 @@ public class AdminService {
         return response;
     }
 
+    // =========================
+    // MENTORSHIP ALLOCATION
+    // =========================
+
+    @Transactional(readOnly = true)
+    public List<AdminMentorOptionResponse> getMentors() {
+        verifyAdmin(currentUserService.getCurrentUser());
+        List<User> mentorUsers = userRepository.findByRoleOrderByCreatedAtDesc(Role.MENTOR);
+        return mentorUsers.stream().map(u -> {
+            Mentor mentor = mentorRepository.findByLogin(u).orElseGet(() -> {
+                Mentor m = new Mentor();
+                m.setLogin(u);
+                m.setName(u.getName() != null && !u.getName().isBlank() ? u.getName() : u.getEmail());
+                return mentorRepository.save(m);
+            });
+            return new AdminMentorOptionResponse(mentor.getId(), u.getId(), mentor.getName(), u.getEmail(), mentor.getExpertise());
+        }).toList();
+    }
+
+    @Transactional
+    public AdminUserResponse assignMentor(UUID userId, AdminAssignMentorRequest request) {
+        verifyAdmin(currentUserService.getCurrentUser());
+        User user = findUser(userId);
+        if (user.getRole() != Role.STUDENT) {
+            throw new IllegalArgumentException("Only students can be assigned to a mentor");
+        }
+
+        Student student = studentRepository.findByLogin(user).orElseGet(() -> {
+            Student s = new Student();
+            s.setLogin(user);
+            s.setName(user.getName() != null && !user.getName().isBlank() ? user.getName() : user.getEmail());
+            return studentRepository.save(s);
+        });
+
+        if (request.getMentorId() != null) {
+            Mentor mentor = mentorRepository.findById(request.getMentorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
+            student.setMentor(mentor);
+        } else {
+            student.setMentor(null);
+        }
+
+        studentRepository.save(student);
+        return toUserResponse(user);
+    }
+
     private AdminUserResponse toUserResponse(
             User user
     ) {
@@ -265,6 +335,15 @@ public class AdminService {
         response.setActive(user.isActive());
         response.setCreatedAt(user.getCreatedAt());
         response.setUpdatedAt(user.getUpdatedAt());
+
+        if (user.getRole() == Role.STUDENT) {
+            studentRepository.findByLogin(user).ifPresent(st -> {
+                if (st.getMentor() != null) {
+                    response.setMentorId(st.getMentor().getId());
+                    response.setMentorName(st.getMentor().getName());
+                }
+            });
+        }
 
         return response;
     }

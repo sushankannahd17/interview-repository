@@ -9,14 +9,24 @@ import java.util.List;
 import java.util.UUID;
 
 public record InterviewExperienceResponse(
-        UUID id, UUID companyId, UUID submittedBy, String role, LocalDate interviewDate,
+        UUID id, UUID companyId, String companyName, UUID submittedBy, String submitterName, String submitterEmail,
+        String role, LocalDate interviewDate,
         String difficulty, String experience, String questionsSummary, String tips,
         String interviewResult, String moderationStatus, boolean consentGiven,
         LocalDateTime consentAt, LocalDateTime submittedAt, String provenance,
         String preparation, String timeline, List<RoundResponse> rounds) {
     public static InterviewExperienceResponse from(InterviewExperience value) {
-        return new InterviewExperienceResponse(value.getId(), value.getCompany().getId(),
-                value.getSubmittedBy().getId(), value.getRole(), value.getInterviewDate(),
+        String compName = value.getCompany() != null ? value.getCompany().getName() : null;
+        String subName = value.getSubmittedBy() != null ? value.getSubmittedBy().getName() : null;
+        String subEmail = value.getSubmittedBy() != null ? value.getSubmittedBy().getEmail() : null;
+        return new InterviewExperienceResponse(
+                value.getId(),
+                value.getCompany() != null ? value.getCompany().getId() : null,
+                compName,
+                value.getSubmittedBy() != null ? value.getSubmittedBy().getId() : null,
+                subName,
+                subEmail,
+                value.getRole(), value.getInterviewDate(),
                 value.getDifficulty(), value.getExperience(), value.getQuestionsSummary(),
                 value.getTips(), value.getInterviewResult(), value.getModerationStatus(),
                 value.isConsentGiven(), value.getConsentAt(), value.getSubmittedAt(),

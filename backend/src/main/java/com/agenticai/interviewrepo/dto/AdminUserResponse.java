@@ -12,8 +12,26 @@ public class AdminUserResponse {
     private String name;
     private Role role;
     private boolean active;
+    private UUID mentorId;
+    private String mentorName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public UUID getMentorId() {
+        return mentorId;
+    }
+
+    public void setMentorId(UUID mentorId) {
+        this.mentorId = mentorId;
+    }
+
+    public String getMentorName() {
+        return mentorName;
+    }
+
+    public void setMentorName(String mentorName) {
+        this.mentorName = mentorName;
+    }
 
     public UUID getId() {
         return id;

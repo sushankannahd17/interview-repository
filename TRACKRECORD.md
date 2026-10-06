@@ -158,6 +158,77 @@ This file documents every major change made across the frontend, backend, databa
     - Integrated with `handleRoleChange(userId, email, newRole)`: calls the backend `PATCH` endpoint with JWT Bearer authentication, updates local component state, displays a real-time success toast, and refreshes the directory.
     - Connected the moderation log viewer in `AdminDashboard.jsx` to the actual `/api/admin/moderation-logs` endpoint with detailed admin audit columns.
 
+---
 
+## Phase 9: Admin & Alumni Experience CRUD, Mentor-Mentee Inspection & Architecture Mindmap (Completed)
+- **Why**: Deliver full interview experience lifecycle management (Create, Read, Update, Delete) for Admin and Alumni, auto-provision role profiles in PostgreSQL upon login, and empower Mentors to inspect mentee profiles and their submitted experiences.
+- **Where**:
+  - **Architecture & Specification**:
+    - `mindmap_architecture.md`: Comprehensive system architecture and mindmap covering authentication data flow, PostgreSQL schema mapping (`login`, `administrator`, `placed_alumni`, `mentor`, `student`, `company`, `interview_experience`, `interview_round`, `question`, `moderation_log`), and the complete RBAC visibility matrix ("who gets to see what").
+  - **Backend Services & Controllers**:
+    - `service/AlumniService.java`: Auto-provisions `PlacedAlumni` record in PostgreSQL upon first access.
+    - `service/MentorService.java`: Auto-provisions `Mentor` record and provides `getMentees()`, `getMenteeDetail()`, `getMenteeExperiences()`, and `assignMentee()`.
+    - `service/StudentService.java`: Auto-provisions `Student` record, resolved Spring Security `AccessDeniedException` import, and fixed `toResponse` ID/name assignment.
+    - `service/AdminService.java`: Auto-provisions `Administrator` record to guarantee foreign key integrity for `moderation_log.admin_id`.
+    - `service/InterviewExperienceService.java`: Added dynamic company resolution (`findByNameIgnoreCase` / auto-creation), `getMyExperiences()`, `update()`, `delete()`, and `getStudentExperiences()`.
+    - `controller/InterviewExperienceController.java`: Added `GET /api/interviews/my`, `PUT /api/interviews/{id}`, `DELETE /api/interviews/{id}`, and `GET /api/interviews/student/{studentId}`.
+    - `controller/MentorController.java`: Added `GET /api/mentor/mentees`, `GET /api/mentor/mentees/{studentId}`, `GET /api/mentor/mentees/{studentId}/experiences`, `GET /api/mentor/available-students`, `POST /api/mentor/mentees/{studentId}/assign`.
+    - `dto/InterviewExperienceRequest.java` & `InterviewExperienceResponse.java`: Made `companyId` optional with `companyName`, added `companyName`, `submitterName`, and `submitterEmail` to responses.
+    - `repository/CompanyRepository.java`, `StudentRepository.java`, `InterviewExperienceRepository.java`: Added queries for companies, mentees, and author-based experiences.
+  - **Frontend UI/UX (Inspired by uxpilot.ai)**:
+    - `ExperienceModal.jsx`: Modern, interactive modal form supporting company resolution, difficulty & outcome pills, multi-round builder, question management, preparation tips, and consent verification.
+    - `ExperienceDetailModal.jsx`: Inspection modal displaying full rounds, questions, difficulty badges, preparation strategies, and hiring timelines.
+    - `MenteeDetailModal.jsx`: Mentor inspection drawer displaying mentee degree, college, batch, skills badges, social/resume links, and expandable submitted experiences.
+    - `AlumniDashboard.jsx`: Integrated profile editing, KPI summary cards, "My Submissions" history with status badges, and full CRUD operations (Create, Read, Update, Delete).
+    - `AdminDashboard.jsx`: Added Experience Management & Moderation tab, profile editing card, and direct Approve/Reject/Edit/Delete actions.
+    - `MentorDashboard.jsx`: Added mentor profile editing, assigned mentees grid, deep inspection action, and candidate connection tab.
+    - `Dashboard.css`: Added modal, drawer, round builder, badge, and card styling.
 
+---
+
+## Phase 10: Default Student Role, Synthetic Experiences Feed, Admin Mentor Assignment & Alumni Community Portal (Completed)
+- **Why**: Deliver user requirements:
+  1. Default role for all newly registered accounts must be `STUDENT`, with Admin having authority to promote/demote.
+  2. Students must see a dedicated interview experiences feed with rich, synthetic experiences in the database, searchable and filterable, with full detail modals.
+  3. Separate dedicated dashboards for Student, Alumni, Mentor, Admin.
+  4. In Admin Dashboard, allow assigning any student to a specific mentor.
+  5. Alumni Dashboard must allow browsing community experiences while retaining submission history and the option to submit new experiences anytime.
+- **Where**:
+  - `backend/src/main/java/com/agenticai/interviewrepo/config/SecurityConfig.java`
+  - `backend/src/main/java/com/agenticai/interviewrepo/security/JwtAuthConverter.java`
+  - `backend/src/main/java/com/agenticai/interviewrepo/service/CurrentUserService.java`, `AuthService.java`, `AdminService.java`, `StudentService.java`
+  - `backend/src/main/java/com/agenticai/interviewrepo/controller/AdminController.java`, `InterviewExperienceController.java`
+  - `backend/src/main/java/com/agenticai/interviewrepo/dto/AdminAssignMentorRequest.java`, `AdminMentorOptionResponse.java`, `AdminUserResponse.java`, `StudentProfileResponse.java`
+  - `backend/.env`, `backend/src/main/resources/application.yml`
+  - `frontend/src/components/StudentDashboard.jsx`, `AdminDashboard.jsx`, `AlumniDashboard.jsx`
+- **What**:
+  - **Auto-Registration with Default STUDENT Role**:
+    - `JwtAuthConverter.java`, `CurrentUserService.java`, `AuthService.java`: Authenticated users absent from `public.login` are automatically registered as `STUDENT` with `isActive = true`. Added concurrency race condition handling to avoid duplicate key exceptions.
+  - **Synthetic Interview Experiences Seeded into PostgreSQL**:
+    - Created and executed `seed_experiences.sql` on Supabase PostgreSQL.
+    - Seeded 6 premier tech companies (Google, Amazon, Microsoft, Atlassian, Uber, Goldman Sachs) with 6 approved experiences, 12 rounds, and 12 questions (covering Big-O algorithms, system design, concurrency, Leadership Principles, and interview tips).
+  - **Student Preparation Hub (`StudentDashboard.jsx`)**:
+    - Implemented a modern SaaS experiences feed inspired by `uxpilot.ai`.
+    - Live keyword search across company name, role, topics, and questions.
+    - Filter dropdown for companies and pill filters for Difficulty (`All`, `Easy`, `Medium`, `Hard`) and Outcome (`All`, `Offered`, `Rejected`).
+    - Experience cards displaying company logo badge, role, date, difficulty & outcome badges, rounds count, question highlights, and preparation strategy snippets.
+    - Connected "Read Experience" button to `ExperienceDetailModal.jsx` for full rounds/questions breakdown.
+    - Added "My Assigned Mentor" tab displaying assigned mentor details (name, email, domain expertise, email CTA) or informative pending notice.
+  - **Admin Mentorship Assignment (`AdminDashboard.jsx`)**:
+    - Added `GET /api/admin/mentors` returning all active mentors with current mentee counts.
+    - Added `PATCH /api/admin/users/{id}/mentor` to assign/unassign a student to a mentor.
+    - Enriched `AdminUserResponse` with `mentorId` and `mentorName`.
+    - Added "Assigned Mentor" column in User Directory table with interactive dropdown for `STUDENT` rows, updating PostgreSQL in real-time.
+  - **Alumni Community Feed (`AlumniDashboard.jsx`)**:
+    - Added "Browse Community Experiences" tab so alumni can browse the same experiences library as students.
+    - Retained "My Submissions History" tab with complete CRUD operations (Create, Edit, Delete).
+    - Prominent "Submit Experience" CTA buttons allowing alumni to contribute whenever they want.
+  - **Database Connection & Pooler Optimization**:
+    - Switched database URL in `backend/.env` to Supabase Transaction Pooler port `6543` with `prepareThreshold=0`, resolving the session port `5432` `EMAXCONNSESSION` connection limit.
+    - Configured HikariCP pool properties (`maximum-pool-size: 5`, `minimum-idle: 1`) in `application.yml`.
+    - Updated `SecurityConfig.java` to permit public GET on `/api/interviews` and `/api/companies/**`.
+  - **Verification**:
+    - Frontend build (`pnpm run build`) succeeded with 0 errors.
+    - Backend build and tests (`./mvnw test-compile`) passed with 0 errors.
+    - Live endpoints tested via `curl`: `/health` returns `200 UP`, `/api/interviews` returns all 6 seeded experiences.
 

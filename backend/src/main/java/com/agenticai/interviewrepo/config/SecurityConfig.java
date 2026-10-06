@@ -77,6 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/health", "/error").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/interviews", "/api/interviews/{id:[0-9a-fA-F-]+}", "/api/companies/**").permitAll()
 
                         // Role-restricted endpoints
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")

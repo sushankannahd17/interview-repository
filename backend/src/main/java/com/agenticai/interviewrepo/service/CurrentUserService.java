@@ -59,6 +59,19 @@ public class CurrentUserService {
                         userRepository.save(user);
                     }
                     return Optional.of(user);
+                } else {
+                    String name = jwtOpt.get().getClaimAsString("name");
+                    if (name == null || name.isBlank()) {
+                        name = email.split("@")[0];
+                    }
+                    User newUser = User.builder()
+                            .authUserId(authUserIdOpt.get())
+                            .email(email)
+                            .name(name)
+                            .role(Role.STUDENT)
+                            .isActive(true)
+                            .build();
+                    return Optional.of(userRepository.save(newUser));
                 }
             }
         }

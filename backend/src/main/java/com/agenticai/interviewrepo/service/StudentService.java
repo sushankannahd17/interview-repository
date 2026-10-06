@@ -9,14 +9,14 @@ import com.agenticai.interviewrepo.model.Role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 
 @Service
 public class StudentService {
     private final StudentRepository studentRepository;
     private final CurrentUserService currentUserService;
 
-    StudentService(StudentRepository studentRepository, CurrentUserService currentUserService) {
+    public StudentService(StudentRepository studentRepository, CurrentUserService currentUserService) {
         this.studentRepository=studentRepository;
         this.currentUserService=currentUserService;
     }
@@ -25,7 +25,13 @@ public class StudentService {
     public StudentProfileResponse getMyProfile() {
         User user=currentUserService.getCurrentUser();
 
-        Student student=studentRepository.findByLogin(user).orElseThrow(() -> new IllegalStateException("Student Profile Not Found"));
+        Student student=studentRepository.findByLogin(user)
+                .orElseGet(() -> {
+                    Student newStudent = new Student();
+                    newStudent.setLogin(user);
+                    newStudent.setName(user.getName() != null && !user.getName().isBlank() ? user.getName() : user.getEmail());
+                    return studentRepository.save(newStudent);
+                });
 
         return toResponse(student);
     }
@@ -38,7 +44,13 @@ public class StudentService {
             throw new AccessDeniedException("Only the user and the administrator can update the profile");
         }
 
-        Student student=studentRepository.findByLogin(user).orElseThrow(()->new IllegalStateException("Student Profile is not found"));
+        Student student=studentRepository.findByLogin(user)
+                .orElseGet(() -> {
+                    Student newStudent = new Student();
+                    newStudent.setLogin(user);
+                    newStudent.setName(user.getName() != null && !user.getName().isBlank() ? user.getName() : user.getEmail());
+                    return studentRepository.save(newStudent);
+                });
 
         if (request.getBio()!=null) {
             student.setBio(request.getBio());
@@ -87,8 +99,8 @@ public class StudentService {
     private StudentProfileResponse toResponse(Student student) {
         StudentProfileResponse response=new StudentProfileResponse();
 
-        response.setId(response.getId());
-        response.setName(response.getName());
+        response.setId(student.getId());
+        response.setName(student.getName());
 
         if (student.getLogin()!=null) {
             response.setEmail(student.getLogin().getEmail());
@@ -106,6 +118,11 @@ public class StudentService {
 
         if (student.getMentor() != null) {
             response.setMentorID(student.getMentor().getId());
+            response.setMentorName(student.getMentor().getName());
+            if (student.getMentor().getLogin() != null) {
+                response.setMentorEmail(student.getMentor().getLogin().getEmail());
+            }
+            response.setMentorExpertise(student.getMentor().getExpertise());
         }
 
         response.setCreatedAt(student.getCreatedAt());

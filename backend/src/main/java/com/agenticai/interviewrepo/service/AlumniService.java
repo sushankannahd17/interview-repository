@@ -24,17 +24,18 @@ public class AlumniService {
         this.currentUserService = currentUserService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AlumniProfileResponse getMyProfile() {
 
         User user = currentUserService.getCurrentUser();
 
         PlacedAlumni alumni = alumniRepository.findByLogin(user)
-                .orElseThrow(() ->
-                        new IllegalStateException(
-                                "Alumni profile not found"
-                        )
-                );
+                .orElseGet(() -> {
+                    PlacedAlumni newAlumni = new PlacedAlumni();
+                    newAlumni.setLogin(user);
+                    newAlumni.setName(user.getName() != null && !user.getName().isBlank() ? user.getName() : user.getEmail());
+                    return alumniRepository.save(newAlumni);
+                });
 
         return toResponse(alumni);
     }

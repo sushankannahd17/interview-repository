@@ -4,6 +4,7 @@ import com.agenticai.interviewrepo.dto.*;
 import com.agenticai.interviewrepo.service.InterviewExperienceService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
@@ -35,6 +36,30 @@ public class InterviewExperienceController {
 
     @GetMapping("/{id}")
     public InterviewExperienceResponse get(@PathVariable UUID id) { return service.get(id); }
+
+    @GetMapping("/my")
+    public java.util.List<InterviewExperienceResponse> getMyExperiences() {
+        return service.getMyExperiences();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('STUDENT','ROLE_STUDENT','ALUMNI','ROLE_ALUMNI','ADMIN','ROLE_ADMIN')")
+    public InterviewExperienceResponse update(@PathVariable UUID id, @Valid @RequestBody InterviewExperienceRequest request) {
+        return service.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('STUDENT','ROLE_STUDENT','ALUMNI','ROLE_ALUMNI','ADMIN','ROLE_ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/student/{studentId}")
+    @PreAuthorize("hasAnyAuthority('MENTOR','ROLE_MENTOR','ADMIN','ROLE_ADMIN')")
+    public java.util.List<InterviewExperienceResponse> getStudentExperiences(@PathVariable UUID studentId) {
+        return service.getStudentExperiences(studentId);
+    }
 
     @GetMapping("/moderation")
     @PreAuthorize("hasAnyAuthority('ADMIN','ROLE_ADMIN')")

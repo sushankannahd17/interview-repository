@@ -40,6 +40,26 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
                         user.setAuthUserId(authUserId);
                         userRepository.save(user);
                     }
+                } else {
+                    String name = jwt.getClaimAsString("name");
+                    if (name == null || name.isBlank()) {
+                        name = email.split("@")[0];
+                    }
+                    User newUser = User.builder()
+                            .authUserId(authUserId)
+                            .email(email)
+                            .name(name)
+                            .role(Role.STUDENT)
+                            .isActive(true)
+                            .build();
+                    try {
+                        userOptional = Optional.of(userRepository.save(newUser));
+                    } catch (Exception e) {
+                        userOptional = userRepository.findByAuthUserId(authUserId);
+                        if (userOptional.isEmpty()) {
+                            userOptional = userRepository.findByEmail(email);
+                        }
+                    }
                 }
             }
         }

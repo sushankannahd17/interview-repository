@@ -17,8 +17,35 @@ public class StudentProfileResponse {
     private String skills;
     private String bio;
     private UUID mentorID;
+    private String mentorName;
+    private String mentorEmail;
+    private String mentorExpertise;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public String getMentorName() {
+        return mentorName;
+    }
+
+    public void setMentorName(String mentorName) {
+        this.mentorName = mentorName;
+    }
+
+    public String getMentorEmail() {
+        return mentorEmail;
+    }
+
+    public void setMentorEmail(String mentorEmail) {
+        this.mentorEmail = mentorEmail;
+    }
+
+    public String getMentorExpertise() {
+        return mentorExpertise;
+    }
+
+    public void setMentorExpertise(String mentorExpertise) {
+        this.mentorExpertise = mentorExpertise;
+    }
 
     public UUID getId() {
         return id;
