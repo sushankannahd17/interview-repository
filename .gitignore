@@ -33,6 +33,4 @@ Thumbs.db
 # Added by ggshield
 .cache_ggshield
 
-#
-PRESENTATION_PPT_PROMPT.md
-JUDGES_PITCH_AND_OVERVIEW.md
+frontend/src/components/AdminDashboard.jsx
