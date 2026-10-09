@@ -1,0 +1,131 @@
+# Full platform: Team A (this repo) + Team B (../Placement_Intelligence_Platform).
+# Expects both repos side by side, each with its own .env:
+#   backend/.env                              Team A backend (Supabase A, AI_SERVICE_API_KEY)
+#   frontend/.env                             Team A frontend (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+#   ../Placement_Intelligence_Platform/.env   Team B (Supabase B, INTERNAL_API_KEY, LLM_API_KEY)
+# AI_SERVICE_API_KEY (Team A) must equal INTERNAL_API_KEY (Team B).
+#
+# Run: docker compose -f docker-compose.integration.yml up --build
+# Browser-facing: frontend http://localhost:5173, backend http://localhost:8080.
+# Team B's API is reachable only inside the compose network.
+
+name: placement-platform
+
+services:
+
+  # ── RabbitMQ ───────────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      # Check that RabbitMQ's AMQP listener accepts connections.
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # ── Team B: FastAPI AI API ─────────────────────────────────────────────────
+  ai-api:
+    image: xrirv/placement-platform-ai-api:latest
+    build:
+      context: ../Placement_Intelligence_Platform
+      dockerfile: Dockerfile
+
+    env_file:
+      - ../Placement_Intelligence_Platform/.env
+
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/
+
+    expose:
+      - "8000"
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+    # FastAPI exposes GET /health.
+    # The Dockerfile also contains a healthcheck, but defining it here
+    # guarantees that Compose knows about the healthcheck.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    restart: unless-stopped
+
+  # ── Team B: AI ingestion worker ───────────────────────────────────────────
+  ai-worker:
+    image: xrirv/placement-platform-ai-worker:latest
+
+    build:
+      context: ../Placement_Intelligence_Platform
+      dockerfile: Dockerfile
+
+    command:
+      - python
+      - -m
+      - app.mq.consumers.ingestion_worker
+
+    # The worker does not expose an HTTP server.
+    # Therefore it must not inherit/use the API healthcheck.
+    healthcheck:
+      disable: true
+
+    env_file:
+      - ../Placement_Intelligence_Platform/.env
+
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      ai-api:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+  # ── Team A: Spring Boot backend ────────────────────────────────────────────
+  backend:
+    image: xrirv/placement-platform-backend:latest
+
+    build:
+      context: ./backend
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      AI_SERVICE_URL: http://ai-api:8000
+      FRONTEND_URL: http://localhost:5173
+
+    ports:
+      - "8080:8080"
+
+    # Backend does not need to wait for AI API health.
+    # AI calls fail open according to the existing project configuration.
+    depends_on:
+      - ai-api
+
+    restart: unless-stopped
+
+  # ── Team A: React frontend ─────────────────────────────────────────────────
+  frontend:
+    image: xrirv/placement-platform-frontend:latest
+
+    build:
+      context: ./frontend
+      args:
+        VITE_BACKEND_URL: http://localhost:8080
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped

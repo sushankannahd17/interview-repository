@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:${SUPABASE_DB_URL:}}
+    username: ${SPRING_DATASOURCE_USERNAME:${SUPABASE_DB_USER:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${SUPABASE_DB_PASSWORD:}}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: ${SPRING_JPA_FORMAT_SQL:false}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_ISSUER_URI:${SUPABASE_AUTH_ISSUER_URI:}}
+          jwk-set-uri: ${SUPABASE_JWK_SET_URI:${SUPABASE_AUTH_JWKS_URI:}}
+server:
+  port: 8080
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
+app:
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:5173,http://localhost:3000}
+  supabase:
+    # Supabase Admin API (used by admin user management). Empty disables it.
+    admin-url: ${SUPABASE_URL:}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+  ai:
+    # Team B (Placement Intelligence Platform) internal API, e.g. http://ai-api:8000 in Docker.
+    # Leave empty to disable AI features; approvals still work.
+    service-url: ${AI_SERVICE_URL:}
+    api-key: ${AI_SERVICE_API_KEY:}
+logging:
+  level:
+    root: INFO
+    com.agenticai.interviewrepo: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
